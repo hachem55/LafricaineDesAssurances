@@ -1,39 +1,25 @@
 package com.LafricaineDesAssurances;
 
-
-import com.LafricaineDesAssurances.AuthRequest;
-import com.LafricaineDesAssurances.AuthResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/auth")
 public class AuthController {
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private JwtService jwtService;  // JwtService that generates tokens
 
-    @Autowired
-    private JwtService jwtService;
-
-    @PostMapping("/login")
-    public AuthResponse login(@RequestBody AuthRequest request) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-            );
-
-            String token = jwtService.generateToken(request.getUsername());
-
-            return new AuthResponse(token);
-
-        } catch (AuthenticationException e) {
-            throw new RuntimeException("Invalid username or password");
+    @PostMapping("/api/auth/login")
+    public ResponseEntity<?> authenticateUser(@RequestBody AuthRequest authRequest) {
+        // Check the username and password (this is just an example; you might want to authenticate properly)
+        if ("demo".equals(authRequest.getUsername()) && "password".equals(authRequest.getPassword())) {
+            String token = jwtService.generateToken(authRequest.getUsername());
+            return ResponseEntity.ok(new AuthResponse(token));  // Send the token back in the response
+        } else {
+            return ResponseEntity.status(401).body("Invalid credentials");
         }
     }
 }
- 
